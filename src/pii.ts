@@ -2,14 +2,23 @@
 class PII<T> {
   constructor(
     private _fire_me_if_you_see_me_accessing_this_property_outside_pii_ts: T,
-  ) { }
+  ) {}
 
   toString() {
     return "PII<REDACTED>"
   }
+
+  toJSON() {
+    return "PII<REDACTED>"
+  }
 }
 
-const markPII = <T>(value: T): PII<T> => new PII(value)
+export function markPII<T, T2 = T extends PII<infer U> ? U : T>(
+  value: T,
+): PII<T2>
+export function markPII<T>(value: T): PII<T> {
+  return value instanceof PII ? value : new PII(value)
+}
 
 export const unwrap = <A>(item: PII<A>): A =>
   item["_fire_me_if_you_see_me_accessing_this_property_outside_pii_ts"]
@@ -31,11 +40,26 @@ export const fold = <A, B>(
   a: Array<PII<A>>,
 ): PII<B> => markPII(a.map(unwrap).reduce(fn, initial))
 
-export const zipWith = <A, B, C>(
+export const zip2With = <A, B, C>(
   fn: (a: A, b: B) => C,
   a: PII<A>,
   b: PII<B>,
 ): PII<C> => markPII(fn(unwrap(a), unwrap(b)))
+
+export const zip3With = <A, B, C, D>(
+  fn: (a: A, b: B, c: C) => D,
+  a: PII<A>,
+  b: PII<B>,
+  c: PII<C>,
+): PII<D> => markPII(fn(unwrap(a), unwrap(b), unwrap(c)))
+
+export const zip4With = <A, B, C, D, E>(
+  fn: (a: A, b: B, c: C, d: D) => E,
+  a: PII<A>,
+  b: PII<B>,
+  c: PII<C>,
+  d: PII<D>,
+): PII<E> => markPII(fn(unwrap(a), unwrap(b), unwrap(c), unwrap(d)))
 
 const proto = Object.prototype
 const gpo = Object.getPrototypeOf
@@ -72,7 +96,7 @@ export const containsPII = (input: unknown): boolean =>
   })
 
 // Does not handle Set or Map for now.
-export const unwrapObject = (input: unknown): any =>
+export const unwrapObject = (input: unknown): unknown =>
   visitPII(input, {
     object: o =>
       Object.keys(o).reduce((sum, key) => {
