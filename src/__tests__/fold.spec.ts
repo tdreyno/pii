@@ -1,4 +1,4 @@
-import PII, { fold, unwrap } from "../pii"
+import PII, { fold, unwrap } from "../index"
 
 describe("fold", () => {
   it("should fold multiple PII", () => {

@@ -1,4 +1,4 @@
-import PII, { unwrapObject } from "../pii"
+import PII, { unwrapObject } from "../index"
 
 describe("unwrapObject", () => {
   it("should remove all wrappers", () => {
