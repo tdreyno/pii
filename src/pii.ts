@@ -2,7 +2,7 @@
 class PII<T> {
   constructor(
     private _fire_me_if_you_see_me_accessing_this_property_outside_pii_ts: T,
-  ) { }
+  ) {}
 
   toString() {
     return "PII<REDACTED>"
@@ -95,7 +95,7 @@ export const containsPII = (input: unknown): boolean =>
 
 // Does not handle Set or Map for now.
 export const unwrapObject = (input: unknown): unknown =>
-  visitPII(input, {
+  visitPII(input instanceof PII ? unwrap(input) : input, {
     object: o =>
       Object.keys(o).reduce((sum, key) => {
         sum[key] = unwrapObject(o[key])
