@@ -2,7 +2,7 @@
 class PII<T> {
   constructor(
     private _fire_me_if_you_see_me_accessing_this_property_outside_pii_ts: T,
-  ) {}
+  ) { }
 
   toString() {
     return "PII<REDACTED>"
@@ -13,10 +13,8 @@ class PII<T> {
   }
 }
 
-export function markPII<T, T2 = T extends PII<infer U> ? U : T>(
-  value: T,
-): PII<T2>
-export function markPII<T>(value: T): PII<T> {
+function markPII<T, T2 = T extends PII<infer U> ? U : T>(value: T): PII<T2>
+function markPII<T>(value: T): PII<T> {
   return value instanceof PII ? value : new PII(value)
 }
 
