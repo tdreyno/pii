@@ -2,7 +2,7 @@
 class PII<T> {
   constructor(
     private _fire_me_if_you_see_me_accessing_this_property_outside_pii_ts: T,
-  ) {}
+  ) { }
 
   toString() {
     return "PII<REDACTED>"
@@ -102,7 +102,7 @@ export const unwrapObject = (input: unknown): unknown =>
         return sum
       }, {} as Record<string, unknown>),
     array: a => a.map(unwrapObject),
-    primitive: p => (p instanceof PII ? unwrap(p) : p),
+    primitive: p => p,
   })
 
 export default markPII
