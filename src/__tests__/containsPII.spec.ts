@@ -1,4 +1,4 @@
-import PII, { containsPII } from "../index"
+import { PII, containsPII } from "../index"
 
 describe("containsPII", () => {
   it("should not find PII", () => {

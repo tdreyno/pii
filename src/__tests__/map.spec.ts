@@ -1,4 +1,4 @@
-import PII, { map, unwrap } from "../index"
+import { PII, map, unwrap } from "../index"
 
 describe("map", () => {
   it("should map inside PII", () => {

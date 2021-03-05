@@ -1,4 +1,4 @@
-import PII, { unwrap } from "../index"
+import { PII, unwrap } from "../index"
 
 describe("unwrap", () => {
   it("upwraps a value", () => {
