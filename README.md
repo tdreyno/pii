@@ -40,8 +40,6 @@ const createUser = (name: PII<string>, phoneNumber: PII<string>) =>
 
 If you want to combine two pieces of PII, such as first and last name, you might want to unwrap, combine and then rewrap them. Once you start using unwrap everywhere, it becomes very hard to maintain safetly. Rather, use the built in methods of this library to mutate and combine PII while keeping the data inside the wrapper.
 
-#### Combine two things
-
 #### Modify PII
 
 ```typescript
@@ -50,6 +48,8 @@ import { PII, map } from "@tdreyno/pii"
 const name = PII("Thomas")
 const lowercaseName = map(n => n.toLowerCase(), name) // PII<"thomas">
 ```
+
+#### Combine two things
 
 ```typescript
 import { PII, zip2With } from "@tdreyno/pii"
