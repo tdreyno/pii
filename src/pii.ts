@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Class which wraps PII and keeps logging from accessing it.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface PII<T> {
@@ -19,19 +20,33 @@ export const PII = <T>(val: T): PII<T> =>
         toJSON: () => "PII<REDACTED>",
       } as PII<T>)
 
-export const unwrap = <A>(item: PII<A>): A =>
+export function unwrap<T>(item: PII<T>): Exclude<T, PII<any>>
+export function unwrap<T>(item: T): Exclude<T, PII<any>>
+export function unwrap<T>(item: T | PII<T>): Exclude<T, PII<any>> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (item as any)[
-    "__fire_me_if_you_see_me_accessing_this_property_outside_pii_ts"
-  ]
+  return isPIIType(item)
+    ? (item as any)[
+        "__fire_me_if_you_see_me_accessing_this_property_outside_pii_ts"
+      ]
+    : item
+}
 
-export const map = <T, T2>(fn: (item: T) => T2, item: PII<T>): PII<T2> =>
-  PII(fn(unwrap(item)))
+export function map<T, T2>(fn: (item: T) => T2, item: PII<T>): PII<T2>
+export function map<T, T2>(fn: (item: T) => T2, item: T): Exclude<T2, PII<any>>
+export function map<T, T2>(
+  fn: (item: T) => T2,
+  item: PII<T> | T,
+): PII<T2> | Exclude<T2, PII<any>> {
+  return PII(fn(unwrap(item)))
+}
 
-export const test = <T>(fn: (item: T) => boolean, item: PII<T>): boolean =>
-  fn(unwrap(item))
+export function test<T>(fn: (item: T) => boolean, item: PII<T>): boolean
+export function test<T>(fn: (item: T) => boolean, item: T): boolean
+export function test<T>(fn: (item: T) => boolean, item: PII<T> | T): boolean {
+  return fn(unwrap(item))
+}
 
-export const fold = <A, B>(
+export function fold<A, B>(
   fn: (
     previousValue: B,
     currentValue: A,
@@ -39,28 +54,30 @@ export const fold = <A, B>(
     array: A[],
   ) => B,
   initial: B,
-  a: Array<PII<A>>,
-): PII<B> => PII(a.map(unwrap).reduce(fn, initial))
+  a: Array<PII<A> | A>,
+): PII<B> {
+  return PII(a.map<A>(unwrap).reduce(fn, initial))
+}
 
 export const zip2With = <A, B, C>(
   fn: (a: A, b: B) => C,
-  a: PII<A>,
-  b: PII<B>,
+  a: PII<A> | A,
+  b: PII<B> | B,
 ): PII<C> => PII(fn(unwrap(a), unwrap(b)))
 
 export const zip3With = <A, B, C, D>(
   fn: (a: A, b: B, c: C) => D,
-  a: PII<A>,
-  b: PII<B>,
-  c: PII<C>,
+  a: PII<A> | A,
+  b: PII<B> | B,
+  c: PII<C> | C,
 ): PII<D> => PII(fn(unwrap(a), unwrap(b), unwrap(c)))
 
 export const zip4With = <A, B, C, D, E>(
   fn: (a: A, b: B, c: C, d: D) => E,
-  a: PII<A>,
-  b: PII<B>,
-  c: PII<C>,
-  d: PII<D>,
+  a: PII<A> | A,
+  b: PII<B> | B,
+  c: PII<C> | C,
+  d: PII<D> | D,
 ): PII<E> => PII(fn(unwrap(a), unwrap(b), unwrap(c), unwrap(d)))
 
 const proto = Object.prototype

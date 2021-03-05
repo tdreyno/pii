@@ -6,4 +6,10 @@ describe("map", () => {
     const mapped = map(a => a.toLowerCase(), result)
     expect(unwrap(mapped)).toBe("test_string")
   })
+
+  it("should map non PII as well", () => {
+    const result = "TEST_STRING"
+    const mapped = map(a => a.toLowerCase(), result)
+    expect(unwrap(mapped)).toBe("test_string")
+  })
 })
