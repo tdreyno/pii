@@ -10,14 +10,14 @@ export interface PII<T> {
 const isPIIType = <T>(val: any): val is PII<T> =>
   isPojo(val) && val.__brand === "PII"
 
-export const PII = <T>(val: T): PII<T> =>
+export const PII = <T>(val: T, msg = "REDACTED"): PII<T> =>
   isPIIType<T>(val)
     ? val
     : ({
         __brand: "PII",
         __fire_me_if_you_see_me_accessing_this_property_outside_pii_ts: val,
-        toString: () => "PII<REDACTED>",
-        toJSON: () => "PII<REDACTED>",
+        toString: () => `PII<${msg}>`,
+        toJSON: () => `PII<${msg}>`,
       } as PII<T>)
 
 export function unwrap<T>(item: PII<T>): Exclude<T, PII<any>>
