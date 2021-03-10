@@ -32,4 +32,22 @@ describe("unwrapObject", () => {
       two: 2,
     })
   })
+
+  it("should ignore Map", () => {
+    const map = new Map()
+
+    expect(unwrapObject({ test: map, two: PII(2) })).toEqual({
+      test: map,
+      two: 2,
+    })
+  })
+
+  it("should ignore weird Numbers", () => {
+    const num = new Number(1)
+
+    expect(unwrapObject({ test: num, two: PII(2) })).toEqual({
+      test: num,
+      two: 2,
+    })
+  })
 })

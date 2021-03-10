@@ -8,7 +8,7 @@ export interface PII<T> {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isPIIType = <T>(val: any): val is PII<T> =>
-  isPojo(val) && val.__brand === "PII"
+  isRecord(val) && val.__brand === "PII"
 
 export const PII = <T>(val: T, msg = "REDACTED"): PII<T> =>
   isPIIType<T>(val)
@@ -83,25 +83,35 @@ export const zip4With = <A, B, C, D, E>(
 const proto = Object.prototype
 const gpo = Object.getPrototypeOf
 
-// POJO: Plain Old Javascript Object
-const isPojo = (obj: unknown): obj is Record<string, unknown> =>
+const isRecord = (obj: unknown): obj is Record<string, unknown> =>
   obj === null || typeof obj !== "object" ? false : gpo(obj) === proto
 
+// Function, regex, object, Number, String, etc
+const isObject = (value: unknown): boolean => {
+  const type = typeof value
+  return value != null && (type == "object" || type == "function")
+}
+
 // Does not handle Set or Map for now.
-const visitPII = <A, T>(
+export const visitPII = <A, T>(
   input: A,
   visitors: {
-    object: (value: Record<string, unknown>) => T
+    record: (value: Record<string, unknown>) => T
+    object: (value: unknown) => T
     array: (value: Array<unknown>) => T
     primitive: (value: A) => T
   },
 ): T => {
-  if (isPojo(input)) {
-    return visitors.object(input)
+  if (isRecord(input)) {
+    return visitors.record(input)
   }
 
   if (Array.isArray(input)) {
     return visitors.array(input)
+  }
+
+  if (isObject(input)) {
+    return visitors.object(input)
   }
 
   return visitors.primitive(input)
@@ -111,18 +121,20 @@ export const containsPII = (input: unknown): boolean =>
   isPIIType(input)
     ? true
     : visitPII(input, {
-        object: o => Object.values(o).some(containsPII),
+        record: o => Object.values(o).some(containsPII),
         array: a => a.some(containsPII),
         primitive: p => isPIIType(p),
+        object: p => isPIIType(p),
       })
 
 export const unwrapObject = (input: unknown): unknown =>
   visitPII(isPIIType(input) ? unwrap(input) : input, {
-    object: o =>
+    record: o =>
       Object.keys(o).reduce((sum, key) => {
         sum[key] = unwrapObject(o[key])
         return sum
       }, {} as Record<string, unknown>),
     array: a => a.map(unwrapObject),
     primitive: p => p,
+    object: p => p,
   })
