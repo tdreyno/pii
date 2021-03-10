@@ -92,11 +92,12 @@ const isObject = (value: unknown): boolean => {
   return value != null && (type == "object" || type == "function")
 }
 
-// Does not handle Set or Map for now.
 export const visitPII = <A, T>(
   input: A,
   visitors: {
     record: (value: Record<string, unknown>) => T
+    map: (value: Map<unknown, unknown>) => T
+    set: (value: Set<unknown>) => T
     object: (value: unknown) => T
     array: (value: Array<unknown>) => T
     primitive: (value: A) => T
@@ -108,6 +109,14 @@ export const visitPII = <A, T>(
 
   if (Array.isArray(input)) {
     return visitors.array(input)
+  }
+
+  if (input instanceof Map) {
+    return visitors.map(input)
+  }
+
+  if (input instanceof Set) {
+    return visitors.set(input)
   }
 
   if (isObject(input)) {
@@ -122,7 +131,10 @@ export const containsPII = (input: unknown): boolean =>
     ? true
     : visitPII(input, {
         record: o => Object.values(o).some(containsPII),
+        map: m =>
+          Array.from(m).some(([k, v]) => containsPII(k) || containsPII(v)),
         array: a => a.some(containsPII),
+        set: s => Array.from(s).some(containsPII),
         primitive: p => isPIIType(p),
         object: p => isPIIType(p),
       })
@@ -134,7 +146,12 @@ export const unwrapObject = (input: unknown): unknown =>
         sum[key] = unwrapObject(o[key])
         return sum
       }, {} as Record<string, unknown>),
+    map: m =>
+      new Map(
+        Array.from(m).map(([k, v]) => [unwrapObject(k), unwrapObject(v)]),
+      ),
     array: a => a.map(unwrapObject),
+    set: s => new Set(Array.from(s).map(unwrapObject)),
     primitive: p => p,
     object: p => p,
   })

@@ -33,11 +33,20 @@ describe("unwrapObject", () => {
     })
   })
 
-  it("should ignore Map", () => {
-    const map = new Map()
+  it("should handle Map", () => {
+    const map = new Map([["a", 1]])
 
     expect(unwrapObject({ test: map, two: PII(2) })).toEqual({
       test: map,
+      two: 2,
+    })
+  })
+
+  it("should handle Set", () => {
+    const set = new Set(["a", "b"])
+
+    expect(unwrapObject({ test: set, two: PII(2) })).toEqual({
+      test: set,
       two: 2,
     })
   })
