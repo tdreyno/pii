@@ -40,6 +40,14 @@ export function map<T, T2>(
   return PII(fn(unwrap(item)))
 }
 
+export function tap<T>(fn: (item: T) => void, item: PII<T>): PII<T>
+export function tap<T>(fn: (item: T) => void, item: T): T
+export function tap<T>(fn: (item: T) => void, item: PII<T> | T): PII<T> | T {
+  fn(unwrap(item))
+
+  return item
+}
+
 export function test<T>(fn: (item: T) => boolean, item: PII<T>): boolean
 export function test<T>(fn: (item: T) => boolean, item: T): boolean
 export function test<T>(fn: (item: T) => boolean, item: PII<T> | T): boolean {
