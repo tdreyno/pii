@@ -90,6 +90,15 @@ const name = PII("Thomas")
 const lowercaseName = tap(n => console.log(n), name) // Logs "Thomas"
 ```
 
+#### Custom PII Redaction
+
+```typescript
+import { PII, redact } from "@tdreyno/pii"
+
+const name = PII("Thomas")
+const lowercaseName = redact(() => "REDACTED", name) // Returns "REDACTED"
+```
+
 ## License
 
 pii is licensed under the Hippocratic License. It is an [Ethical Source license](https://ethicalsource.dev) derived from the MIT License, amended to limit the impact of the unethical use of open source software.

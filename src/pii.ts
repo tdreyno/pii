@@ -163,3 +163,23 @@ export const unwrapObject = (input: unknown): unknown =>
     primitive: p => p,
     object: p => p,
   })
+
+export const redact = (redactor: (data: any) => any, input: unknown): unknown =>
+  visitPII(isPIIType(input) ? redactor(input) : input, {
+    record: o =>
+      Object.keys(o).reduce((sum, key) => {
+        sum[key] = redact(redactor, o[key])
+        return sum
+      }, {} as Record<string, unknown>),
+    map: m =>
+      new Map(
+        Array.from(m).map(([k, v]) => [
+          redact(redactor, k),
+          redact(redactor, v),
+        ]),
+      ),
+    array: a => a.map(x => redact(redactor, x)),
+    set: s => new Set(Array.from(s).map(x => redact(redactor, x))),
+    primitive: p => p,
+    object: p => p,
+  })
