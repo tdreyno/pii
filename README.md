@@ -90,6 +90,20 @@ const name = PII("Thomas")
 const lowercaseName = tap(n => console.log(n), name) // Logs "Thomas"
 ```
 
+#### Detecting PII in Data
+
+Recurses through a data structure and uses a callback to detect values that should become PII.
+
+```typescript
+import { PII, detect } from "@tdreyno/pii"
+
+const person = { name: "Thomas" }
+const lowercaseName = detect(
+  data => isObject(person) && Object.keys().some(k => k.includes(name)),
+  person,
+) // Returns PII({ name: "Thomas" })
+```
+
 #### Custom PII Redaction
 
 ```typescript

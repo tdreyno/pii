@@ -7,11 +7,11 @@ export interface PII<T> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isPIIType = <T>(val: any): val is PII<T> =>
+export const isPII = <T>(val: any): val is PII<T> =>
   isRecord(val) && val.__brand === "PII"
 
 export const PII = <T>(val: T, msg = "REDACTED"): PII<T> =>
-  isPIIType<T>(val)
+  isPII<T>(val)
     ? val
     : ({
         __brand: "PII",
@@ -24,7 +24,7 @@ export function unwrap<T>(item: PII<T>): Exclude<T, PII<any>>
 export function unwrap<T>(item: T): Exclude<T, PII<any>>
 export function unwrap<T>(item: T | PII<T>): Exclude<T, PII<any>> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return isPIIType(item)
+  return isPII(item)
     ? (item as any)[
         "__fire_me_if_you_see_me_accessing_this_property_outside_pii_ts"
       ]
@@ -135,7 +135,7 @@ export const visitPII = <A, T>(
 }
 
 export const containsPII = (input: unknown): boolean =>
-  isPIIType(input)
+  isPII(input)
     ? true
     : visitPII(input, {
         record: o => Object.values(o).some(containsPII),
@@ -143,12 +143,12 @@ export const containsPII = (input: unknown): boolean =>
           Array.from(m).some(([k, v]) => containsPII(k) || containsPII(v)),
         array: a => a.some(containsPII),
         set: s => Array.from(s).some(containsPII),
-        primitive: p => isPIIType(p),
-        object: p => isPIIType(p),
+        primitive: p => isPII(p),
+        object: p => isPII(p),
       })
 
 export const unwrapObject = (input: unknown): unknown =>
-  visitPII(isPIIType(input) ? unwrap(input) : input, {
+  visitPII(isPII(input) ? unwrap(input) : input, {
     record: o =>
       Object.keys(o).reduce((sum, key) => {
         sum[key] = unwrapObject(o[key])
@@ -165,7 +165,7 @@ export const unwrapObject = (input: unknown): unknown =>
   })
 
 export const redact = (redactor: (data: any) => any, input: unknown): unknown =>
-  visitPII(isPIIType(input) ? redactor(input) : input, {
+  visitPII(isPII(input) ? redactor(input) : input, {
     record: o =>
       Object.keys(o).reduce((sum, key) => {
         sum[key] = redact(redactor, o[key])
@@ -183,3 +183,30 @@ export const redact = (redactor: (data: any) => any, input: unknown): unknown =>
     primitive: p => p,
     object: p => p,
   })
+
+export const detect = (
+  detector: (data: any) => boolean,
+  input: unknown,
+): unknown =>
+  isPII(input)
+    ? input
+    : detector(input)
+    ? PII(input)
+    : visitPII(input, {
+        record: o =>
+          Object.keys(o).reduce((sum, key) => {
+            sum[key] = detect(detector, o[key])
+            return sum
+          }, {} as Record<string, unknown>),
+        map: m =>
+          new Map(
+            Array.from(m).map(([k, v]) => [
+              detect(detector, k),
+              detect(detector, v),
+            ]),
+          ),
+        array: a => a.map(x => detect(detector, x)),
+        set: s => new Set(Array.from(s).map(x => detect(detector, x))),
+        primitive: p => p,
+        object: p => p,
+      })
