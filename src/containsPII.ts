@@ -6,15 +6,13 @@ const containsPII = (input: unknown, maxDepth = Infinity): boolean => {
     return true
   }
 
+  const fn = (v: any) => containsPII(v, maxDepth - 1)
+
   return visit(input, {
-    record: o => Object.values(o).some(i => containsPII(i, maxDepth - 1)),
-    map: m =>
-      Array.from(m).some(
-        ([k, v]) =>
-          containsPII(k, maxDepth - 1) || containsPII(v, maxDepth - 1),
-      ),
-    array: a => a.some(i => containsPII(i, maxDepth - 1)),
-    set: s => Array.from(s).some(i => containsPII(i, maxDepth - 1)),
+    record: r => Object.values(r).some(fn),
+    map: m => Array.from(m).some(([k, v]) => fn(k) || fn(v)),
+    array: a => a.some(fn),
+    set: s => Array.from(s).some(fn),
     primitive: p => isPII(p),
     object: p => isPII(p),
   })
