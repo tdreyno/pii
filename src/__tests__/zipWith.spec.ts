@@ -1,4 +1,8 @@
-import { PII, zip2With, zip3With, zip4With, unwrap } from "../index"
+import PII from "../pii"
+import zip2With from "../zip2With"
+import zip3With from "../zip3With"
+import zip4With from "../zip4With"
+import unwrap from "../unwrap"
 
 describe("zipWith", () => {
   it("should zipWith two different types of PII", () => {

@@ -1,4 +1,5 @@
-import { PII, unwrapObject } from "../index"
+import PII from "../pii"
+import unwrapObject from "../unwrapObject"
 
 describe("unwrapObject", () => {
   it("should remove all wrappers", () => {
@@ -57,6 +58,12 @@ describe("unwrapObject", () => {
     expect(unwrapObject({ test: num, two: PII(2) })).toEqual({
       test: num,
       two: 2,
+    })
+  })
+
+  it("should return null after max depth", () => {
+    expect(unwrapObject({ test: [{ hello: "world" }] }, 2)).toEqual({
+      test: [null],
     })
   })
 })

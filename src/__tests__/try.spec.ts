@@ -1,4 +1,5 @@
-import { PIITry, unwrap } from "../index"
+import PIITry from "../PIITry"
+import unwrap from "../unwrap"
 
 describe("PIITry", () => {
   it("should wrap results in PII", async () => {

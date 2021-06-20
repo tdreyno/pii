@@ -1,4 +1,5 @@
-import { PII, unwrap } from "../index"
+import PII from "../pii"
+import unwrap from "../unwrap"
 
 describe("PII", () => {
   it("should not leak into toString", () => {

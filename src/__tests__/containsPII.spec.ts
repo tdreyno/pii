@@ -1,4 +1,5 @@
-import { PII, containsPII } from "../index"
+import PII from "../pii"
+import containsPII from "../containsPII"
 
 describe("containsPII", () => {
   it("should not find PII", () => {
@@ -19,5 +20,9 @@ describe("containsPII", () => {
     expect(containsPII(PII({}))).toBeTruthy()
     expect(containsPII([PII("test")])).toBeTruthy()
     expect(containsPII({ test: PII(1) })).toBeTruthy()
+  })
+
+  it("should return true after max depth", () => {
+    expect(containsPII({ test: [{ hello: "world" }] }, 2)).toBeTruthy()
   })
 })

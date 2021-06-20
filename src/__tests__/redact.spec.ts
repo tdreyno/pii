@@ -1,4 +1,5 @@
-import { PII, redact } from "../index"
+import PII from "../pii"
+import redact from "../redact"
 
 const REDACTED = "REDACTED"
 const redactor = () => REDACTED
@@ -60,6 +61,12 @@ describe("redact", () => {
     expect(redact(redactor, { test: num, two: PII(2) })).toEqual({
       test: num,
       two: REDACTED,
+    })
+  })
+
+  it("should return PII after max depth", () => {
+    expect(redact(redactor, { test: [{ hello: "world" }] }, 2)).toEqual({
+      test: [REDACTED],
     })
   })
 })

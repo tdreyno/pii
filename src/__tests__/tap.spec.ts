@@ -1,4 +1,6 @@
-import { PII, tap, unwrap } from "../index"
+import PII from "../pii"
+import tap from "../tap"
+import unwrap from "../unwrap"
 
 describe("tap", () => {
   it("should tap inside PII", () => {

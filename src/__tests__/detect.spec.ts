@@ -1,5 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { detect, isPII } from "../index"
+import { isPII } from "../pii"
+import detect from "../detect"
+import unwrap from "../unwrap"
 
 const detector = (data: unknown) => Array.isArray(data)
 
@@ -24,5 +25,11 @@ describe("detect", () => {
 
     const detectedArrays = detect(detector, { test: set })
     expect(isPII(Array.from((detectedArrays as any).test)[0])).toBeTruthy()
+  })
+
+  it("should return PII after max depth", () => {
+    const result: any = detect(() => false, { test: [{ hello: "world" }] }, 2)
+
+    expect(unwrap(result.test[0])).toEqual({ hello: "world" })
   })
 })

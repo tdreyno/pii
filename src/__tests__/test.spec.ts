@@ -1,4 +1,5 @@
-import { PII, test } from "../index"
+import PII from "../pii"
+import test from "../test"
 
 describe("test", () => {
   it("should test predicate against PII", () => {
