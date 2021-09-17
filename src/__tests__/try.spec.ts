@@ -13,7 +13,9 @@ describe("PIITry", () => {
         throw new Error("Error message")
       })
     } catch (e) {
-      expect(unwrap(e).message).toBe("Error message")
+      if (e instanceof Error) {
+        expect(unwrap(e).message).toBe("Error message")
+      }
     }
   })
 })
